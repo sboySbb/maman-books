@@ -232,3 +232,17 @@ docker compose logs -f bot
 4. The bot searches and shows a list of results — tap one to download
 5. If the result is an epub and `ALLOWED_FORMATS` includes both formats, you'll be asked: **EPUB or PDF?**
 6. The file is sent directly in the chat — if VirusTotal is enabled, it's scanned first
+
+---
+
+## Troubleshooting
+
+- **"All download sources unavailable"** — your ISP's DNS may be blocking download servers (Libgen, etc.). Switch to a public DNS such as Cloudflare (`1.1.1.1`) or Google (`8.8.8.8`). When running in Docker, you can set this in `docker-compose.yml`:
+  ```yaml
+  services:
+    bot:
+      dns:
+        - 1.1.1.1
+        - 8.8.8.8
+  ```
+  For French users, a step-by-step guide is available in [LISEZMOI.md](./LISEZMOI.md).
