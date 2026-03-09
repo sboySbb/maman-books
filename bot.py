@@ -49,7 +49,7 @@ ALLOWED_FORMATS: list[str] = [
     f for f in (s.strip() for s in os.environ.get("ALLOWED_FORMATS", "epub,pdf").split(","))
     if f in _VALID_FORMATS
 ] or ["epub"]  # fallback si la valeur env est invalide
-VERSION = "1.2.0"
+VERSION = "1.2.1"
 MAX_RESULTS = 10
 MAX_FILE_SIZE = 400 * 1024 * 1024 if LOCAL_API_SERVER else 50 * 1024 * 1024
 MAX_QUERY_LENGTH = 200

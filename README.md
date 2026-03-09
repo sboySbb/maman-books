@@ -108,7 +108,6 @@ Both sources are optional and independent — you can enable one, the other, or 
 | Variable | Description |
 |---|---|
 | `ALLOWED_FORMATS` | Comma-separated list of formats to offer. Accepted values: `epub`, `pdf`, `mobi`, `azw3`. Default: `epub,pdf`. If only one value is set, no format question is asked. Kindle models from 2022 onward support EPUB natively — MOBI/AZW3 are mainly needed for older Kindles. |
-| `USER_PREFS_FILE` | Path to the JSON file that stores per-user preferences (format, email, Kindle address). Default: `user_prefs.json` (next to `bot.py`). Set to `data/user_prefs.json` to keep it in the `data/` folder. |
 
 Format selection only applies to epub results. The bot always downloads EPUB and converts on the fly:
 - **→ PDF**: PyMuPDF (no extra dependency required)
@@ -183,7 +182,7 @@ python bot.py
 The bot will start and print its active configuration, then log `Bot started.` when ready:
 
 ```
---- maman-books v1.2.0 ---
+--- maman-books v1.2.1 ---
   Anna's Archive : ✓ https://…
   Prowlarr       : ✗ désactivé
   Formats        : epub, pdf, mobi, azw3
@@ -252,7 +251,7 @@ docker compose up -d --build
 docker compose logs -f bot
 ```
 
-> **User preferences** are stored in `./data/user_prefs.json` on the host (bind-mounted into the container). The `data/` folder is created automatically on first run. Make sure to set `USER_PREFS_FILE=data/user_prefs.json` in your `.env`.
+> **User preferences** are stored in `./data/user_prefs.json` on the host (bind-mounted into the container). The `data/` folder is created automatically on first run.
 
 ---
 

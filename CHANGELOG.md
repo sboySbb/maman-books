@@ -5,6 +5,25 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.2.1] — 2026-03-09
+
+### Fixed
+
+- `prefs.py`: default path for `user_prefs.json` now resolves relative to the script directory (`__file__`) instead of the current working directory — the file is always created next to `bot.py` regardless of where the bot is launched from.
+- `docker-compose.yml`: `USER_PREFS_FILE=data/user_prefs.json` is now injected directly via the `environment` block instead of relying on `.env` — Docker users no longer need to set this variable manually.
+- Removed `USER_PREFS_FILE` from `.env.example` (and `.env`) — Python users never need to set it.
+
+### Changed
+
+- Anna's Archive: removed JSON API attempt (`/search.json` always returns 404) — search now goes directly to HTML scraping.
+
+### CI/CD
+
+- GitHub Actions workflow now triggers on version tags (`v*`) instead of pushes to `main`.
+- Docker images are tagged with the full semver (`1.2.1`), major.minor (`1.2`), and `latest`.
+
+---
+
 ## [1.2.0] — 2026-03-09
 
 ### Added

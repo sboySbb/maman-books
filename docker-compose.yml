@@ -3,6 +3,8 @@ services:
     image: ghcr.io/zoeille/maman-books:latest
     restart: unless-stopped
     env_file: .env
+    environment:
+      - USER_PREFS_FILE=data/user_prefs.json
     volumes:
       - ${BOOKS_DOWNLOAD_PATH}:${BOOKS_DOWNLOAD_PATH}:ro
       - ./data:/app/data

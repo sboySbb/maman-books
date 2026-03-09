@@ -6,7 +6,8 @@ import os
 import tempfile
 from typing import Any
 
-PREFS_FILE = os.environ.get("USER_PREFS_FILE", "user_prefs.json")
+_default_prefs_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "user_prefs.json")
+PREFS_FILE = os.environ.get("USER_PREFS_FILE") or _default_prefs_file
 _lock = asyncio.Lock()
 
 
