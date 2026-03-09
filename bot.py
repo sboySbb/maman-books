@@ -49,7 +49,7 @@ ALLOWED_FORMATS: list[str] = [
     f for f in (s.strip() for s in os.environ.get("ALLOWED_FORMATS", "epub,pdf").split(","))
     if f in _VALID_FORMATS
 ] or ["epub"]  # fallback si la valeur env est invalide
-VERSION = "1.2.1"
+VERSION = "1.2.2"
 MAX_RESULTS = 10
 MAX_FILE_SIZE = 400 * 1024 * 1024 if LOCAL_API_SERVER else 50 * 1024 * 1024
 MAX_QUERY_LENGTH = 200
@@ -689,9 +689,34 @@ async def handle_download(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         )
         return
 
-    # Format unique configuré : on télécharge directement
+    # Format unique configuré : vérifier si on doit quand même demander la destination
     desired_fmt = ALLOWED_FORMATS[0] if ALLOWED_FORMATS else "epub"
-    await _do_download(query, context, idx, desired_fmt=desired_fmt, destination="telegram")
+    context.user_data[f"fmt_{idx}"] = desired_fmt
+
+    user_prefs = await prefs.get(update.effective_user.id)
+    has_email = bool(user_prefs.get("email"))
+    has_kindle = bool(user_prefs.get("kindle_email"))
+
+    if has_email or has_kindle:
+        title = result.get("title") or "ce livre"
+        dest_buttons = [
+            InlineKeyboardButton("📬 Telegram", callback_data=f"dest_telegram_{idx}"),
+        ]
+        if has_email:
+            dest_buttons.append(InlineKeyboardButton("📧 Email", callback_data=f"dest_email_{idx}"))
+        if has_kindle:
+            dest_buttons.append(InlineKeyboardButton("📖 Kindle", callback_data=f"dest_kindle_{idx}"))
+
+        keyboard = InlineKeyboardMarkup([
+            dest_buttons,
+            [InlineKeyboardButton("⛔ Annuler", callback_data="cancel_dl")],
+        ])
+        await query.edit_message_text(
+            f"📚 « {title[:50]} »\n\n📬 Où envoyer ?",
+            reply_markup=keyboard,
+        )
+    else:
+        await _do_download(query, context, idx, desired_fmt=desired_fmt, destination="telegram")
 
 
 async def handle_download_fmt(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

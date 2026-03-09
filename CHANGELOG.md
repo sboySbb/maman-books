@@ -5,6 +5,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.2.2] — 2026-03-09
+
+### Fixed
+
+- **Destination menu not shown with a single format** — when only one format was configured (`ALLOWED_FORMATS=epub`), the bot skipped the destination menu and always sent to Telegram, ignoring any configured email or Kindle address. The menu now appears whenever the user has email/Kindle configured, regardless of the number of allowed formats.
+
+---
+
 ## [1.2.1] — 2026-03-09
 
 ### Fixed
