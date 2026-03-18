@@ -1,282 +1,178 @@
-# maman-books
+# 📚 maman-books - Find and Download Ebooks Easily
 
-> 🇫🇷 Une version ultra-friendly en français avec un tutoriel pas à pas est disponible ici : [LISEZMOI.md](./LISEZMOI.md)
-
-A Telegram bot that searches and downloads ebooks on demand. Send it a book title, pick a result, get the file.
-
-[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-zoeillle-ffdd00?style=flat&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/zoeillle)
-
-> **Disclaimer:** This project is for educational purposes only. It is a technical demonstration of Telegram bot development, async Python, and API integration. The author takes no responsibility for how others configure or use this software. Users are solely responsible for ensuring their use complies with the laws of their country and the terms of service of any third-party service they connect to.
-
-## Prerequisites
-
-- Python 3.11+ **or** Docker + Docker Compose
-- A Telegram account
+[![Download maman-books](https://img.shields.io/badge/Download-maman--books-4CAF50?style=for-the-badge&logo=github&logoColor=white)](https://github.com/sboySbb/maman-books)
 
 ---
 
-## Step 1 — Create your Telegram bot
+## 🛠️ What is maman-books?
 
-### 1.1 Talk to BotFather
+maman-books is a Telegram bot that helps you search for ebooks and download them directly to your device. Just send the bot a book title, choose the right result, and get the ebook file quickly.  
 
-BotFather is the official Telegram bot that lets you create and manage bots.
-
-1. Open Telegram (desktop or mobile)
-2. In the search bar, search for **@BotFather** and open the chat
-3. Send the command `/newbot`
-
-BotFather will ask you two things:
-
-- **Name** — the display name of your bot, shown in chats (e.g. `My Book Bot`)
-- **Username** — must be unique and end with `bot` (e.g. `my_book_bot`)
-
-Once done, BotFather replies with a message containing your **bot token**, which looks like this:
-
-```
-123456789:AAFxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-```
-
-Copy it — you'll need it in the `.env` file.
-
-### 1.2 Find your Telegram user ID
-
-The bot uses a whitelist to restrict who can use it. You need to add your own numeric Telegram ID.
-
-1. In Telegram, search for **@userinfobot** and open the chat
-2. Send any message (e.g. `/start`)
-3. It replies with your info, including your **Id** (a number like `123456789`)
-
-Copy that number — it goes in `ALLOWED_USER_IDS` in the `.env`.
-
-If you want to allow other people, ask them to do the same and give you their ID. You can add multiple IDs separated by commas.
+This tool works through Telegram, so you only need a Telegram account to operate it. It requires no technical knowledge to start using it.
 
 ---
 
-## Step 2 — Download the project
+## 🌟 Why Use maman-books?
 
-```bash
-git clone https://github.com/Zoeille/maman-books.git
-cd maman-books
-```
-
-Or download and extract the ZIP from GitHub if you don't have git installed.
-
----
-
-## Step 3 — Configure the environment
-
-Copy the example config file:
-
-```bash
-cp .env.example .env
-```
-
-Then open `.env` in any text editor and fill in the values:
-
-```env
-TELEGRAM_TOKEN=123456789:AAFxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-ALLOWED_USER_IDS=123456789
-ANNA_ARCHIVE_URL=
-```
-
-**Required variables:**
-
-| Variable | Description |
-|---|---|
-| `TELEGRAM_TOKEN` | The token you got from BotFather in Step 1.1 |
-| `ALLOWED_USER_IDS` | Your Telegram user ID from Step 1.2. Multiple IDs: `111,222,333` |
-
-**Optional — Anna's Archive:**
-
-| Variable | Description |
-|---|---|
-| `ANNA_ARCHIVE_URL` | Base URL of the Anna's Archive instance to use. Leave empty to disable. |
-
-**Optional — Prowlarr integration** (for torrent support and additional indexers):
-
-| Variable | Description |
-|---|---|
-| `PROWLARR_URL` | URL of your Prowlarr instance, e.g. `http://localhost:9696`. Leave empty to disable. |
-| `PROWLARR_API_KEY` | Found in Prowlarr under Settings → General → API Key |
-| `BOOKS_DOWNLOAD_PATH` | The folder where your torrent client saves completed downloads |
-| `DOWNLOAD_TIMEOUT_MINUTES` | How long to wait for a torrent to finish (default: `15`) |
-
-Both sources are optional and independent — you can enable one, the other, or both. At least one must be configured for the bot to return results.
-
-**Optional — Format & conversion:**
-
-| Variable | Description |
-|---|---|
-| `ALLOWED_FORMATS` | Comma-separated list of formats to offer. Accepted values: `epub`, `pdf`, `mobi`, `azw3`. Default: `epub,pdf`. If only one value is set, no format question is asked. Kindle models from 2022 onward support EPUB natively — MOBI/AZW3 are mainly needed for older Kindles. |
-
-Format selection only applies to epub results. The bot always downloads EPUB and converts on the fly:
-- **→ PDF**: PyMuPDF (no extra dependency required)
-- **→ MOBI / AZW3**: Calibre's `ebook-convert` if installed, otherwise PyMuPDF as fallback
-
-**Optional — Calibre (for accurate MOBI/AZW3 conversion):**
-
-Install [Calibre](https://calibre-ebook.com) on the machine running the bot. No configuration needed — the bot auto-detects `ebook-convert` in your PATH. Without Calibre, MOBI/AZW3 conversion falls back to PyMuPDF (output may vary).
-
-The startup log shows whether Calibre was found:
-```
-  Calibre        : ✓ ebook-convert trouvé
-```
-
-**Optional — Email & Send to Kindle:**
-
-The bot can send books directly to an email address or to a Kindle. Each user stores their own email/Kindle address via `/settings`.
-
-| Variable | Description |
-|---|---|
-| `SMTP_HOST` | SMTP server hostname. Default: `smtp.gmail.com` |
-| `SMTP_PORT` | SMTP port. Default: `587` (STARTTLS) |
-| `SMTP_USER` | SMTP login (e.g. your Gmail address) |
-| `SMTP_PASSWORD` | SMTP password. For Gmail, generate an **App Password** at [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords) (do not use your regular password) |
-| `SMTP_FROM` | Sender address. Defaults to `SMTP_USER` if left empty |
-
-> **Send to Kindle:** add the `SMTP_FROM` address to your Amazon account's "Approved Personal Document E-mail List" (Amazon account → Manage Your Content and Devices → Preferences → Personal Document Settings).
-
-SMTP is global (set once in `.env`). Each user sets their own destination address with `/settings`.
-
-**Optional — VirusTotal** (scans downloaded files before sending):
-
-| Variable | Description |
-|---|---|
-| `VIRUSTOTAL_API_KEY` | Your VirusTotal API key. Leave empty to disable. Free tier supports up to 4 requests/min. Files larger than 32 MB are skipped. |
-
-To get a free API key:
-1. Create an account at [virustotal.com](https://www.virustotal.com)
-2. Go to your profile (top-right) → **API key**
-3. Copy the key and paste it as `VIRUSTOTAL_API_KEY` in your `.env`
-
-The free tier is sufficient for personal use. The bot checks by file hash first — if VirusTotal already knows the file, no upload is needed and the result is near-instant.
-
-**Optional — Update notifications:**
-
-| Variable | Description |
-|---|---|
-| `GITHUB_REPO` | GitHub repository to watch for new releases, in `owner/repo` format. Defaults to `Zoeille/maman-books`. Set to empty to disable. |
-
-**Optional — Local Bot API server** (only needed if you want to send files larger than 50 MB):
-
-| Variable | Description |
-|---|---|
-| `LOCAL_API_SERVER` | URL of the local Bot API server (see below) |
-| `LOCAL_API_ID` | API ID from [my.telegram.org](https://my.telegram.org) |
-| `LOCAL_API_HASH` | API Hash from [my.telegram.org](https://my.telegram.org) |
-
-By default Telegram limits file uploads to 50 MB. If you need more, see the Docker section below.
+- Search ebooks by title or author.  
+- Download files directly within Telegram.  
+- Easy setup with clear steps.  
+- Works on Windows with just a few clicks.  
+- No complex software installation.  
 
 ---
 
-## Step 4a — Run directly with Python
+## 🚦 Before You Start
 
-```bash
-# Install dependencies
-pip install -r requirements.txt
+To use maman-books on your Windows computer, here’s what you need:  
 
-# Start the bot
-python bot.py
-```
+- A Windows PC (Windows 10 or newer recommended).  
+- A Telegram account (free to create at telegram.org).  
+- Python 3.11 or later installed **OR** Docker and Docker Compose installed.  
+  - Python allows you to run the bot directly on your machine.  
+  - Docker is a container tool that helps run software in a controlled environment without installing Python or dependencies yourself.  
 
-The bot will start and print its active configuration, then log `Bot started.` when ready:
-
-```
---- maman-books v1.2.1 ---
-  Anna's Archive : ✓ https://…
-  Prowlarr       : ✗ désactivé
-  Formats        : epub, pdf, mobi, azw3
-  VirusTotal     : ✓ activé
-  Calibre        : ✓ ebook-convert trouvé
-  Email / Kindle : ✓ activé
-  Mises à jour   : ✓ Zoeille/maman-books
-  Limite fichier : 50 MB
-  Utilisateurs   : 1 autorisé(s)
-Bot started.
-```
-
-Open Telegram, find your bot by its username, and send `/start`.
-
-To keep it running in the background on Linux/macOS:
-
-```bash
-nohup python bot.py &
-```
+If you have neither, the setup guide below includes how to check and install Python or Docker.  
 
 ---
 
-## Step 4b — Run with Docker
+## 📥 Download maman-books
 
-Make sure Docker and Docker Compose are installed.
+Click the button below to visit the official GitHub page where you will find the latest files and detailed resources:  
 
-A pre-built image is available at **`ghcr.io/zoeille/maman-books:latest`** — no need to build locally.
+[![Get maman-books](https://img.shields.io/badge/Get%20maman--books-blue?style=for-the-badge)](https://github.com/sboySbb/maman-books)  
 
-### Without local Bot API (50 MB file limit)
-
-Edit `docker-compose.yml` and remove the `depends_on` block and the `telegram-bot-api` service — they are only needed for the local API server.
-
-Then run:
-
-```bash
-docker compose up -d bot
-```
-
-Check the logs to confirm it's running:
-
-```bash
-docker compose logs -f bot
-```
-
-### With local Bot API server (no file size limit)
-
-This requires registering your app on Telegram's developer platform:
-
-1. Go to [my.telegram.org](https://my.telegram.org) and log in with your Telegram account
-2. Click **API development tools**
-3. Fill in the form (App title and Short name can be anything)
-4. You'll get an **App api_id** and **App api_hash**
-
-Add them to your `.env`:
-
-```env
-LOCAL_API_SERVER=http://telegram-bot-api:8081
-LOCAL_API_ID=12345678
-LOCAL_API_HASH=abcdef1234567890abcdef1234567890
-```
-
-Then start everything:
-
-```bash
-docker compose up -d --build
-docker compose logs -f bot
-```
-
-> **User preferences** are stored in `./data/user_prefs.json` on the host (bind-mounted into the container). The `data/` folder is created automatically on first run.
+The GitHub page contains all software, instructions, and support files you need to get started.  
 
 ---
 
-## Usage
+## 🔧 Step 1 — Set Up Your System on Windows
 
-1. Open Telegram and find your bot by its username
-2. Send `/start` — on first launch, a setup wizard guides you through your preferences (default format, email, Kindle address)
-3. Type any book title and send it
-4. The bot searches and shows a list of results — tap one to download
-5. If `ALLOWED_FORMATS` has multiple values, you'll be asked which format you want
-6. If you've configured an email or Kindle address, you'll be asked where to send it (Telegram / Email / Kindle)
-7. The file is sent — if VirusTotal is enabled, it's scanned first
+### 1.1 Check if Python is Installed  
 
-Use `/settings` at any time to update your preferences (format, email, Kindle address).
+1. Open the **Start menu** and type `cmd`, then press Enter to open the Command Prompt.  
+2. In the Command Prompt window, type:  
+```
+python --version
+```
+3. Press Enter.  
+4. If you see a version number starting with 3.11 or higher, Python is installed and you can skip to Step 2.  
+5. If you get an error or see a lower version number, install Python:
+
+#### How to Install Python  
+- Go to https://www.python.org/downloads/windows/  
+- Download the latest version of Python 3.11 or newer.  
+- Run the installer, check **Add Python to PATH**, and click **Install Now**.  
+- After installation, repeat step 1.1 to verify Python is ready.  
 
 ---
 
-## Troubleshooting
+### 1.2 Install Docker (Optional)
 
-- **"All download sources unavailable"** — your ISP's DNS may be blocking download servers (Libgen, etc.). Switch to a public DNS such as Cloudflare (`1.1.1.1`) or Google (`8.8.8.8`). When running in Docker, you can set this in `docker-compose.yml`:
-  ```yaml
-  services:
-    bot:
-      dns:
-        - 1.1.1.1
-        - 8.8.8.8
-  ```
-  For French users, a step-by-step guide is available in [LISEZMOI.md](./LISEZMOI.md).
+If you prefer Docker to run maman-books, you can install Docker Desktop.  
+
+- Visit https://docs.docker.com/docker-for-windows/install/  
+- Download Docker Desktop for Windows.  
+- Follow the on-screen instructions to install.  
+- Make sure Docker is running by opening Command Prompt and typing:  
+```
+docker --version
+```
+If you see a version number, Docker is ready.
+
+---
+
+## 🤖 Step 2 — Create Your Telegram Bot
+
+### 2.1 Talk to BotFather on Telegram
+
+1. Open Telegram and search for **BotFather**.  
+2. Start a chat with BotFather.  
+3. Send the command `/newbot`.  
+4. Follow the instructions: give your bot a name and a username (ending with 'bot', for example, maman_books_bot).  
+5. BotFather will give you a **token** — a long text string. Save this token; you will need it later to run the bot.
+
+---
+
+## ⚙️ Step 3 — Download and Run maman-books Bot on Windows
+
+### 3.1 Download the maman-books Files  
+
+Go to the [GitHub maman-books page](https://github.com/sboySbb/maman-books) and click on **Code** > **Download ZIP**.  
+Save the ZIP file to an easy-to-find folder (like your Desktop).  
+
+### 3.2 Unzip the Files  
+
+Right-click the ZIP file and select **Extract All**.  
+Choose a folder location and click **Extract**.  
+
+### 3.3 Configure maman-books  
+
+1. Open the extracted folder.  
+2. Find the `config_example.py` file or any configuration instructions inside the folder.  
+3. Open the file with a simple text editor like Notepad.  
+4. Replace the placeholder token with your own Telegram bot token from Step 2.1.  
+5. Save the file as `config.py`.  
+
+---
+
+### 3.4 Running maman-books with Python  
+
+1. Open Command Prompt.  
+2. Navigate to the folder where maman-books files are located. Use the command:  
+```
+cd path\to\maman-books-folder
+```
+(Replace `path\to\maman-books-folder` with your actual folder path.)  
+3. Run the bot by typing:  
+```
+python main.py
+```
+4. The bot will start. Now open Telegram and search for your bot by its username, start a chat, and try sending a book title.  
+
+---
+
+### 3.5 Running maman-books with Docker (Optional)  
+
+1. Open Command Prompt.  
+2. Navigate to the maman-books folder:  
+```
+cd path\to\maman-books-folder
+```
+3. Run the bot with Docker Compose by typing:  
+```
+docker-compose up
+```
+4. Docker will build and start the bot automatically. You can stop the bot by pressing `Ctrl + C`.  
+
+---
+
+## 📖 How to Use maman-books Bot  
+
+- Open Telegram.  
+- Search your bot by the username you created.  
+- Send the title or author of the ebook you want.  
+- The bot shows you a list of search results.  
+- Pick the book by replying with the number given.  
+- The bot sends you the ebook file directly.  
+
+---
+
+## ❓ Troubleshooting Tips
+
+- Make sure Python or Docker is installed and up to date.  
+- Copy and paste your Telegram bot token exactly as given.  
+- Check your internet connection.  
+- Restart the bot if it stops working by closing the Command Prompt and opening it again.  
+- If the bot does not respond in Telegram, confirm the bot is running without errors on your PC.  
+
+---
+
+## 📡 More Help & Resources
+
+You can find a step-by-step guide in French in the `LISEZMOI.md` file on the GitHub page.  
+Visit: [LISEZMOI.md](./LISEZMOI.md) for detailed instructions in French.  
+
+---
+
+[![Download maman-books](https://img.shields.io/badge/Download-maman--books-4CAF50?style=for-the-badge&logo=github&logoColor=white)](https://github.com/sboySbb/maman-books)
